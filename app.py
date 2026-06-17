@@ -94,6 +94,30 @@ st.markdown(
             border-right: 1px solid rgba(15, 23, 42, 0.06);
         }
 
+        .sidebar-filter-card {
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(15, 118, 110, 0.12);
+            border-radius: 22px;
+            padding: 1rem;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+        }
+
+        .sidebar-filter-title {
+            font-size: 0.82rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+
+        .sidebar-filter-note {
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-bottom: 0.9rem;
+        }
+
         .hero {
             background: linear-gradient(135deg, rgba(15, 118, 110, 0.98), rgba(11, 92, 171, 0.96));
             color: white;
@@ -237,43 +261,37 @@ st.markdown(
 
 
 with st.sidebar:
-    st.markdown("## Filters")
-    st.caption("Narrow the dashboard before you compare channels or audiences.")
-
-    selected_channels = st.multiselect(
-        "Channel",
-        options=sorted(df["channel"].dropna().unique().tolist()),
-        default=sorted(df["channel"].dropna().unique().tolist()),
+    st.markdown(
+        """
+        <div class="sidebar-filter-card">
+            <div class="sidebar-filter-title">Filters</div>
+            <div class="sidebar-filter-note">Use the dropdowns to focus the dashboard on one campaign slice at a time.</div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    selected_countries = st.multiselect(
-        "Country",
-        options=sorted(df["country"].dropna().unique().tolist()),
-        default=sorted(df["country"].dropna().unique().tolist()),
-    )
+    channel_options = ["All"] + sorted(df["channel"].dropna().unique().tolist())
+    country_options = ["All"] + sorted(df["country"].dropna().unique().tolist())
+    device_options = ["All"] + sorted(df["device"].dropna().unique().tolist())
+    segment_options = ["All"] + sorted(df["segment"].dropna().unique().tolist())
 
-    selected_devices = st.multiselect(
-        "Device",
-        options=sorted(df["device"].dropna().unique().tolist()),
-        default=sorted(df["device"].dropna().unique().tolist()),
-    )
+    selected_channel = st.selectbox("Channel", channel_options, index=0)
+    selected_country = st.selectbox("Country", country_options, index=0)
+    selected_device = st.selectbox("Device", device_options, index=0)
+    selected_segment = st.selectbox("Segment", segment_options, index=0)
 
-    selected_segments = st.multiselect(
-        "Segment",
-        options=sorted(df["segment"].dropna().unique().tolist()),
-        default=sorted(df["segment"].dropna().unique().tolist()),
-    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 filtered_df = df.copy()
-if selected_channels:
-    filtered_df = filtered_df[filtered_df["channel"].isin(selected_channels)]
-if selected_countries:
-    filtered_df = filtered_df[filtered_df["country"].isin(selected_countries)]
-if selected_devices:
-    filtered_df = filtered_df[filtered_df["device"].isin(selected_devices)]
-if selected_segments:
-    filtered_df = filtered_df[filtered_df["segment"].isin(selected_segments)]
+if selected_channel != "All":
+    filtered_df = filtered_df[filtered_df["channel"] == selected_channel]
+if selected_country != "All":
+    filtered_df = filtered_df[filtered_df["country"] == selected_country]
+if selected_device != "All":
+    filtered_df = filtered_df[filtered_df["device"] == selected_device]
+if selected_segment != "All":
+    filtered_df = filtered_df[filtered_df["segment"] == selected_segment]
 
 
 if filtered_df.empty:
